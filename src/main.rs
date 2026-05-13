@@ -17,6 +17,15 @@ fn greet_people(query: Query<&Name, With<Person>>) {
     }
 }
 
+fn update_people(mut query: Query<&mut Name, With<Person>>) {
+    for mut name in &mut query {
+        if name.0 == "ovah dev" {
+            name.0 ="ovah dumb".to_string();
+            break;
+        }
+    }
+}
+
 fn hello_world() {
     println!("hello world!");
 }
@@ -24,6 +33,6 @@ fn hello_world() {
 fn main() {
     App::new()
         .add_systems(Startup, add_people)
-        .add_systems(Update, (hello_world, greet_people))
+        .add_systems(Update, (hello_world, (update_people, greet_people).chain()))
         .run();
 }
