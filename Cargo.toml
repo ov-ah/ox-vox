@@ -3,5 +3,11 @@ name = "ox-vox"
 version = "0.1.0"
 edition = "2024"
 
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"] # deps
+opt-level = 3
+
 [dependencies]
 bevy = "0.18.1"
