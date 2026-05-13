@@ -1,49 +1,27 @@
 use bevy::prelude::*;
 
-pub struct HelloPlugin;
-
-#[derive(Component)]
-struct Person;
-
-#[derive(Component)]
-struct Name(String);
-
-#[derive(Resource)]
-struct GreetTimer(Timer);
-
-fn add_people(mut commands: Commands) {
-    commands.spawn((Person, Name("ovah dev".to_string())));
-    commands.spawn((Person, Name("anaconda sniper".to_string())));
-}
-
-fn greet_people(time: Res<Time>, mut timer: ResMut<GreetTimer>, query: Query<&Name, With<Person>>) {
-    if timer.0.tick(time.delta()).just_finished() {
-        for name in &query {
-            println!("hello {}!", name.0);
-        }
-    }
-}
-
-fn update_people(mut query: Query<&mut Name, With<Person>>) {
-    for mut name in &mut query {
-        if name.0 == "ovah dev" {
-            name.0 ="ovah dumb".to_string();
-            break;
-        }
-    }
-}
-
-impl Plugin for HelloPlugin {
-    fn build(&self, app: &mut App) {
-        app.insert_resource(GreetTimer(Timer::from_seconds(2.0, TimerMode::Repeating)));
-        app.add_systems(Startup, add_people);
-        app.add_systems(Update, ((update_people, greet_people).chain()));
-    }
-}
-
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(HelloPlugin)
+        .add_systems(Startup, setup)
         .run();
+}
+
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    //camera
+    commands.spawn((
+            Camera3d::default(),
+            Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
+    ));
+
+    // cube
+    commands.spawn((
+            Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
+            MeshMaterial3d(materials.add(Color::srgb_u8(0, 255, 0))),
+            Transform::from_xyz(0.0, 0.5, 0.0),
+    ));
 }
