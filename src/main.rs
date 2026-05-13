@@ -1,4 +1,11 @@
-use bevy::prelude::*;
+use bevy:: {
+    prelude::*,
+    color::palettes::css::*,
+    pbr::wireframe::{
+        NoWireframe, Wireframe, WireframeColor, WireframeConfig, WireframePlugin,
+    },
+    render::{render_resource::WgpuFeatures, settings::WgpuSettings, RenderPlugin},
+};
 use bevy::window::{PresentMode, Window, WindowPlugin};
 
 mod ui;
@@ -6,17 +13,34 @@ use ui::FpsCounterPlugin;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                present_mode: PresentMode::AutoNoVsync,
-                ..default()
-            }),
+        .add_plugins((
+            DefaultPlugins
+                .set(RenderPlugin {
+                    render_creation: WgpuSettings {
+                        features: WgpuFeatures::POLYGON_MODE_LINE,
+                        ..default()
+                    }
+                    .into(),
+                    ..default()
+                })
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        present_mode: PresentMode::AutoNoVsync,
+                        ..default()
+                    }),
+                    ..default()
+                }),
+            WireframePlugin::default(),
+        ))
+        .insert_resource(WireframeConfig {
+            global: true,
+            default_color: RED.into(),
             ..default()
-        }))
+        })
         .add_plugins(FpsCounterPlugin)
         .add_systems(Startup, setup)
         .add_systems(Update, update_camera)
-        .run();
+        .run();        
 }
 
 fn setup(
@@ -75,7 +99,7 @@ fn update_camera(
     time: Res<Time>,
     mut query: Query<&mut Transform, With<Camera>>,
 ) {
-    // orbit the camera, transform pos X, Z and rotate X to pan at object
+    // orbit the camera, transform pos X
     for mut transform in &mut query {
         let radius = 15.0;
         let speed  = 1.0;
